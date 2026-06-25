@@ -4,6 +4,12 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize EmailJS with your Public Key
+    // Replace "YOUR_PUBLIC_KEY" with the actual public key from your EmailJS Account dashboard
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init("YOUR_PUBLIC_KEY");
+    }
+
     // ----------------------------------------------------
     // 1. DYNAMIC TYPEWRITER EFFECT
     // ----------------------------------------------------
@@ -300,26 +306,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 const originalBtnText = submitBtn.innerHTML;
                 submitBtn.innerHTML = 'Sending... <i class="fa-solid fa-spinner fa-spin btn-icon"></i>';
                 
-                // Simulate form submission to backend (API call simulation)
-                setTimeout(() => {
-                    // Show success alert
-                    formFeedback.classList.remove('hide-feedback');
-                    formFeedback.classList.add('show-feedback');
-                    
-                    // Reset form fields
-                    contactForm.reset();
-                    
-                    // Restore button
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalBtnText;
-                    
-                    // Hide success toast after 5 seconds
-                    setTimeout(() => {
-                        formFeedback.classList.remove('show-feedback');
-                        formFeedback.classList.add('hide-feedback');
-                    }, 5000);
-                    
-                }, 1500); // 1.5 seconds mock sending delay
+                // Prepare EmailJS parameters matching your template keys
+                const templateParams = {
+                    from_name: nameInput.value.trim(),
+                    from_email: emailInput.value.trim(),
+                    subject: subjectInput.value.trim(),
+                    message: messageInput.value.trim(),
+                    to_name: "Pinnika Manoj"
+                };
+
+                // Send email using EmailJS
+                // Note: Replace "YOUR_SERVICE_ID" and "YOUR_TEMPLATE_ID" with actual identifiers
+                emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", templateParams)
+                    .then(() => {
+                        showFormFeedback(true, 'Your message has been sent successfully. I will get back to you shortly.');
+                        contactForm.reset();
+                    })
+                    .catch((error) => {
+                        console.error('EmailJS Error:', error);
+                        showFormFeedback(false, 'Failed to send message. Please try again later or email me directly.');
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                    });
             }
         });
         
@@ -351,6 +361,53 @@ document.addEventListener('DOMContentLoaded', () => {
         if (errorSpan) {
             errorSpan.style.display = 'none';
         }
+    }
+
+    let feedbackTimeout = null;
+    function showFormFeedback(isSuccess, messageText) {
+        if (!formFeedback) return;
+        
+        const feedbackTitle = formFeedback.querySelector('.feedback-title');
+        const feedbackDesc = formFeedback.querySelector('.feedback-desc');
+        const feedbackIcon = formFeedback.querySelector('.feedback-content i');
+        
+        if (isSuccess) {
+            formFeedback.style.background = 'rgba(16, 185, 129, 0.12)';
+            formFeedback.style.borderColor = 'rgba(16, 185, 129, 0.25)';
+            if (feedbackTitle) {
+                feedbackTitle.style.color = '#10b981';
+                feedbackTitle.textContent = 'Success!';
+            }
+            if (feedbackIcon) {
+                feedbackIcon.className = 'fa-solid fa-circle-check feedback-success-icon';
+                feedbackIcon.style.color = '#10b981';
+            }
+        } else {
+            formFeedback.style.background = 'rgba(239, 68, 68, 0.12)';
+            formFeedback.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+            if (feedbackTitle) {
+                feedbackTitle.style.color = '#ef4444';
+                feedbackTitle.textContent = 'Error!';
+            }
+            if (feedbackIcon) {
+                feedbackIcon.className = 'fa-solid fa-triangle-exclamation';
+                feedbackIcon.style.color = '#ef4444';
+            }
+        }
+        
+        if (feedbackDesc) {
+            feedbackDesc.textContent = messageText;
+        }
+        
+        formFeedback.classList.remove('hide-feedback');
+        formFeedback.classList.add('show-feedback');
+        
+        // Auto hide after 6 seconds
+        if (feedbackTimeout) clearTimeout(feedbackTimeout);
+        feedbackTimeout = setTimeout(() => {
+            formFeedback.classList.remove('show-feedback');
+            formFeedback.classList.add('hide-feedback');
+        }, 6000);
     }
 
 
