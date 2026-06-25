@@ -1357,7 +1357,7 @@ img, svg {
    ========================================================================== */
 .back-to-top {
     position: fixed;
-    bottom: 2rem;
+    bottom: 6.5rem; /* Shifted up to make space for WhatsApp button */
     right: 2rem;
     width: 44px;
     height: 44px;
@@ -1387,6 +1387,32 @@ img, svg {
 .back-to-top:hover {
     transform: translateY(-4px);
     box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+}
+
+/* Floating WhatsApp Button */
+.whatsapp-float {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 52px;
+    height: 52px;
+    background-color: #25d366;
+    color: #ffffff !important;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.45);
+    z-index: 100;
+    transition: var(--transition-smooth);
+    cursor: pointer;
+}
+
+.whatsapp-float:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.65);
+    background-color: #22c35e;
 }
 
 /* ==========================================================================
@@ -1599,6 +1625,34 @@ img, svg {
     
     .form-container {
         padding: 1.5rem;
+    }
+    
+    /* Hide scrollbars on mobile */
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+        display: none !important;
+    }
+    html, body {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+    
+    /* Adjust position & size of floating buttons on mobile */
+    .whatsapp-float {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 46px;
+        height: 46px;
+        font-size: 1.5rem;
+        box-shadow: 0 3px 12px rgba(37, 211, 102, 0.4);
+    }
+    
+    .back-to-top {
+        bottom: 5.2rem;
+        right: 1.5rem;
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
     }
 }
 
