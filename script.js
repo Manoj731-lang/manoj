@@ -4,10 +4,9 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize EmailJS with your Public Key
-    // Replace "YOUR_PUBLIC_KEY" with the actual public key from your EmailJS Account dashboard
+    // Initialize EmailJS with Public Key
     if (typeof emailjs !== 'undefined') {
-        emailjs.init("YOUR_PUBLIC_KEY");
+        emailjs.init("x4EKl5UqcBl9TN7CB");
     }
 
     // ----------------------------------------------------
@@ -315,11 +314,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     to_name: "Pinnika Manoj"
                 };
 
-                // Send email using EmailJS
-                // Note: Replace "YOUR_SERVICE_ID" and "YOUR_TEMPLATE_ID" with actual identifiers
-                emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", templateParams)
+                // EmailJS Configuration
+                const SERVICE_ID = "service_ga0j96j";
+                const ADMIN_TEMPLATE_ID = "template_g49lm9n"; // Email notification sent to Manoj
+                const AUTOREPLY_TEMPLATE_ID = ""; // Optional: Auto-reply template ID for visitor (leave empty if using EmailJS Auto-Reply tab)
+
+                // Send email notification to Admin (and optionally Auto-Reply to visitor)
+                const sendPromises = [emailjs.send(SERVICE_ID, ADMIN_TEMPLATE_ID, templateParams)];
+                
+                if (AUTOREPLY_TEMPLATE_ID && AUTOREPLY_TEMPLATE_ID !== "YOUR_AUTOREPLY_TEMPLATE_ID") {
+                    sendPromises.push(emailjs.send(SERVICE_ID, AUTOREPLY_TEMPLATE_ID, templateParams));
+                }
+
+                Promise.all(sendPromises)
                     .then(() => {
-                        showFormFeedback(true, 'Your message has been sent successfully. I will get back to you shortly.');
+                        showFormFeedback(true, 'Your message has been sent successfully! A confirmation email has been sent to your inbox.');
                         contactForm.reset();
                     })
                     .catch((error) => {

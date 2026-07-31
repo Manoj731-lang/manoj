@@ -94,17 +94,19 @@ You have two options for the user auto-reply:
    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
    ```
 
-2. Open [script.js](file:///c:/Users/91703/OneDrive/Documents/portifilio/script.js) and locate the EmailJS initialization section at the top of the file:
+2. Open [script.js](file:///c:/Users/91703/OneDrive/Documents/portifilio/script.js) - EmailJS is configured as follows:
    ```javascript
-   emailjs.init("YOUR_PUBLIC_KEY"); // <-- Replace with your actual Public Key
+   emailjs.init("x4EKl5UqcBl9TN7CB"); // Public Key
    ```
 
-3. Scroll down to the form submission handler (around line 297) and update the service and template IDs:
+3. Form submission handler configuration:
    ```javascript
-   emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", templateParams)
+   const SERVICE_ID = "service_ga0j96j";
+   const ADMIN_TEMPLATE_ID = "template_g49lm9n";
    ```
-   - Replace `"YOUR_SERVICE_ID"` with the Service ID from Step 2.
-   - Replace `"YOUR_TEMPLATE_ID"` with the Template ID for the admin alert template from Step 3.
+   - Service ID: `service_ga0j96j`
+   - Template ID: `template_g49lm9n`
+   - Public Key: `x4EKl5UqcBl9TN7CB`
 
 ---
 
