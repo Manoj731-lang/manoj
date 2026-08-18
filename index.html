@@ -945,6 +945,107 @@
         <i class="fa-solid fa-arrow-up"></i>
     </button>
 
+    <!-- AI Chatbot Floating Widget (Bottom Left) -->
+    <div class="ai-chatbot-wrapper" id="ai-chatbot-wrapper">
+        <!-- Floating Trigger Button -->
+        <button class="ai-chatbot-trigger" id="ai-chatbot-trigger" aria-label="Open AI Assistant Chatbot" title="Ask AI about Pinnika Manoj">
+            <div class="ai-trigger-icon-container">
+                <i class="fa-solid fa-robot ai-icon-robot"></i>
+                <i class="fa-solid fa-xmark ai-icon-close"></i>
+            </div>
+            <span class="ai-trigger-badge">Ask AI</span>
+            <span class="ai-status-pulse"></span>
+        </button>
+
+        <!-- Chatbot Window Popup -->
+        <div class="ai-chatbot-window" id="ai-chatbot-window" aria-hidden="true">
+            <!-- Header -->
+            <div class="ai-chat-header">
+                <div class="ai-chat-header-info">
+                    <div class="ai-avatar-wrapper">
+                        <i class="fa-solid fa-robot"></i>
+                        <span class="ai-online-dot"></span>
+                    </div>
+                    <div class="ai-header-text">
+                        <h3 class="ai-chat-title">Manoj's AI Assistant</h3>
+                        <span class="ai-chat-subtitle"><i class="fa-solid fa-bolt"></i> Powered by ChatGPT</span>
+                    </div>
+                </div>
+                <div class="ai-header-actions">
+                    <button type="button" class="ai-header-btn" id="ai-settings-btn" title="OpenAI API Key Settings">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                    <button type="button" class="ai-header-btn" id="ai-clear-btn" title="Clear Conversation">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                    <button type="button" class="ai-header-btn" id="ai-close-btn" title="Close Chat">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- API Key Settings Panel -->
+            <div class="ai-settings-panel" id="ai-settings-panel">
+                <div class="ai-settings-header">
+                    <h4><i class="fa-solid fa-key"></i> OpenAI ChatGPT API Key</h4>
+                    <button type="button" id="ai-settings-close" class="ai-header-btn"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <p class="ai-settings-desc">
+                    Enter your OpenAI API Key (`sk-...`) to query ChatGPT directly. If left blank, the built-in Smart Portfolio AI Engine will answer!
+                </p>
+                <div class="ai-settings-input-group">
+                    <input type="password" id="ai-api-key-input" placeholder="sk-..." class="ai-settings-input">
+                    <button type="button" id="ai-save-key-btn" class="btn btn-sm btn-primary">Save</button>
+                </div>
+                <span class="ai-key-status" id="ai-key-status"></span>
+            </div>
+
+            <!-- Chat Messages Container -->
+            <div class="ai-chat-body" id="ai-chat-body">
+                <!-- Welcome Message -->
+                <div class="ai-msg ai-msg-bot">
+                    <div class="ai-msg-avatar">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="ai-msg-content">
+                        <p>Hi there! 👋 I am <strong>Pinnika Manoj's AI Assistant</strong>, linked with ChatGPT profile context!</p>
+                        <p>Ask me anything about Manoj's <strong>Python & Django skills</strong>, <strong>live projects</strong>, <strong>experience</strong>, or <strong>contact info</strong>.</p>
+                    </div>
+                </div>
+
+                <!-- Suggestion Chips -->
+                <div class="ai-suggestions-container" id="ai-suggestions-container">
+                    <span class="ai-suggestion-label">Quick Questions:</span>
+                    <div class="ai-chips">
+                        <button type="button" class="ai-chip" data-question="Who is Pinnika Manoj?">👨‍💻 Who is Manoj?</button>
+                        <button type="button" class="ai-chip" data-question="What are Manoj's primary technical skills?">⚡ Technical Skills</button>
+                        <button type="button" class="ai-chip" data-question="Tell me about Manoj's key projects and live websites.">📁 Key Projects</button>
+                        <button type="button" class="ai-chip" data-question="What is Manoj's work experience?">💼 Experience</button>
+                        <button type="button" class="ai-chip" data-question="How can I contact Manoj for job opportunities?">📬 Contact Info</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="ai-typing-wrapper" id="ai-typing-wrapper">
+                <div class="ai-typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span class="ai-typing-text">AI is typing...</span>
+            </div>
+
+            <!-- Chat Input Area -->
+            <form class="ai-chat-input-area" id="ai-chat-form">
+                <input type="text" id="ai-chat-input" class="ai-chat-input" placeholder="Ask anything about Pinnika Manoj..." autocomplete="off" required>
+                <button type="submit" class="ai-send-btn" id="ai-send-btn" aria-label="Send Message">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- EmailJS SDK CDN -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 

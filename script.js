@@ -427,4 +427,354 @@ document.addEventListener('DOMContentLoaded', () => {
     if (yearElement) {
         yearElement.textContent = new Date().getFullYear();
     }
+
+
+    // ----------------------------------------------------
+    // 10. AI CHATBOT ENGINE (CHATGPT INTEGRATION & SMART FALLBACK)
+    // ----------------------------------------------------
+    const aiWrapper = document.getElementById('ai-chatbot-wrapper');
+    const aiTrigger = document.getElementById('ai-chatbot-trigger');
+    const aiWindow = document.getElementById('ai-chatbot-window');
+    const aiCloseBtn = document.getElementById('ai-close-btn');
+    const aiClearBtn = document.getElementById('ai-clear-btn');
+    const aiSettingsBtn = document.getElementById('ai-settings-btn');
+    const aiSettingsPanel = document.getElementById('ai-settings-panel');
+    const aiSettingsClose = document.getElementById('ai-settings-close');
+    const aiApiKeyInput = document.getElementById('ai-api-key-input');
+    const aiSaveKeyBtn = document.getElementById('ai-save-key-btn');
+    const aiKeyStatus = document.getElementById('ai-key-status');
+    const aiChatBody = document.getElementById('ai-chat-body');
+    const aiChatForm = document.getElementById('ai-chat-form');
+    const aiChatInput = document.getElementById('ai-chat-input');
+    const aiTypingWrapper = document.getElementById('ai-typing-wrapper');
+    const aiChipsContainer = document.getElementById('ai-suggestions-container');
+
+    // System Context Prompt for ChatGPT
+    const MANOJ_SYSTEM_PROMPT = `
+You are the personal AI Assistant for Pinnika Manoj. Answer user questions enthusiastically, accurately, professionally, and concisely in friendly Markdown format based on Pinnika Manoj's background profile.
+
+--- PROFILE ---
+- Name: Pinnika Manoj
+- Title: Python Developer | Django Developer | Full-Stack Web Engineer
+- Location: Hyderabad, Telangana, India
+- Email: manojpinnika2002@gmail.com
+- Phone / WhatsApp: +91 70325 54637
+- GitHub: https://github.com/manojpinnika
+- LinkedIn: https://linkedin.com/in/pinnika-manoj-7a28b8257
+
+--- WORK EXPERIENCE ---
+1. Python Developer | Smarttopia Edutech Pvt. Ltd. (Apr 2026 – Present)
+   - Built and deployed 3 live production websites: smarttopiaedutech.com, smarttopia.in, and dsrcloudtech.com using Python, Django, and REST APIs.
+   - Designed scalable backend architectures, database models, and API endpoints for high-traffic educational platforms.
+   - Optimized application performance through code refactoring, query optimization, and caching strategies.
+2. Python Developer Intern | KIGA IT Solutions (Jan 2026 – Apr 2026)
+   - Contributed to corporate website development, RESTful APIs, and relational database models in Agile setup.
+
+--- EDUCATION ---
+1. MCA (Master of Computer Applications) - Andhra Loyola College, Vijayawada (2022–2024, CGPA: 8.1 / 10)
+2. B.Sc. (Computer Science) - Sri Nagarjuna Degree College, Ongole (2019–2022, CGPA: 8.0 / 10)
+
+--- TECHNICAL SKILLS ---
+- Python (95%), Django (90%), Django ORM (88%), REST API (88%), SQL (85%), JavaScript (80%), HTML (92%), CSS (88%), Git & GitHub (88%), VS Code.
+- Competencies: Backend Development, Database Modeling, REST API Design, Performance Optimization, Agile.
+
+--- KEY PROJECTS ---
+1. Smarttopia Edutech Platform (Live: https://smarttopiaedutech.com) - Full-stack edutech portal with Django REST APIs, dashboards, payment module.
+2. DSR Cloud Tech Website (Live: https://dsrcloudtech.com) - Corporate web presence with Django dynamic CMS & SEO optimization.
+3. E-Commerce Web Application - Multi-category e-commerce platform with catalog & checkout routines.
+
+If asked non-relevant questions, briefly respond politely and invite the user to ask about Manoj's skills, experience, or projects.
+`;
+
+    // Conversation Memory Array for ChatGPT API
+    let chatHistory = [];
+
+    // Preload Saved API Key from localStorage
+    if (aiApiKeyInput) {
+        const savedKey = localStorage.getItem('manoj_openai_api_key');
+        if (savedKey) {
+            aiApiKeyInput.value = savedKey;
+            if (aiKeyStatus) {
+                aiKeyStatus.className = 'ai-key-status success';
+                aiKeyStatus.textContent = '✓ ChatGPT API Key Active';
+            }
+        } else if (aiKeyStatus) {
+            aiKeyStatus.className = 'ai-key-status info';
+            aiKeyStatus.textContent = 'ℹ Using Built-in Smart Portfolio AI Engine';
+        }
+    }
+
+    // Toggle Chat Window
+    function toggleChatbot() {
+        if (!aiWrapper) return;
+        aiWrapper.classList.toggle('active');
+        const isActive = aiWrapper.classList.contains('active');
+        if (aiWindow) {
+            aiWindow.setAttribute('aria-hidden', !isActive);
+        }
+        if (isActive && aiChatInput) {
+            setTimeout(() => aiChatInput.focus(), 200);
+            scrollToBottom();
+        }
+    }
+
+    if (aiTrigger) aiTrigger.addEventListener('click', toggleChatbot);
+    if (aiCloseBtn) aiCloseBtn.addEventListener('click', toggleChatbot);
+
+    // Toggle Settings Panel
+    if (aiSettingsBtn && aiSettingsPanel) {
+        aiSettingsBtn.addEventListener('click', () => {
+            aiSettingsPanel.classList.toggle('active');
+        });
+    }
+    if (aiSettingsClose && aiSettingsPanel) {
+        aiSettingsClose.addEventListener('click', () => {
+            aiSettingsPanel.classList.remove('active');
+        });
+    }
+
+    // Save OpenAI API Key
+    if (aiSaveKeyBtn && aiApiKeyInput) {
+        aiSaveKeyBtn.addEventListener('click', () => {
+            const keyVal = aiApiKeyInput.value.trim();
+            if (keyVal.length > 0) {
+                localStorage.setItem('manoj_openai_api_key', keyVal);
+                if (aiKeyStatus) {
+                    aiKeyStatus.className = 'ai-key-status success';
+                    aiKeyStatus.textContent = '✓ API Key Saved Successfully!';
+                }
+            } else {
+                localStorage.removeItem('manoj_openai_api_key');
+                if (aiKeyStatus) {
+                    aiKeyStatus.className = 'ai-key-status info';
+                    aiKeyStatus.textContent = 'ℹ API Key cleared. Using Smart AI Engine.';
+                }
+            }
+            setTimeout(() => {
+                if (aiSettingsPanel) aiSettingsPanel.classList.remove('active');
+            }, 1200);
+        });
+    }
+
+    // Clear Conversation History
+    if (aiClearBtn && aiChatBody) {
+        aiClearBtn.addEventListener('click', () => {
+            chatHistory = [];
+            aiChatBody.innerHTML = `
+                <div class="ai-msg ai-msg-bot">
+                    <div class="ai-msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div class="ai-msg-content">
+                        <p>Chat cleared! 👋 How can I help you with <strong>Pinnika Manoj's</strong> portfolio today?</p>
+                    </div>
+                </div>
+            `;
+            if (aiChipsContainer) {
+                aiChatBody.appendChild(aiChipsContainer);
+                aiChipsContainer.style.display = 'block';
+            }
+            scrollToBottom();
+        });
+    }
+
+    // Quick Suggestion Chips Handler
+    if (aiChatBody) {
+        aiChatBody.addEventListener('click', (e) => {
+            const chip = e.target.closest('.ai-chip');
+            if (chip) {
+                const questionText = chip.getAttribute('data-question') || chip.textContent.trim();
+                handleUserSend(questionText);
+            }
+        });
+    }
+
+    // Form Submit Handler
+    if (aiChatForm) {
+        aiChatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = aiChatInput.value.trim();
+            if (text) {
+                handleUserSend(text);
+                aiChatInput.value = '';
+            }
+        });
+    }
+
+    // Main Process Function to Handle User Input
+    async function handleUserSend(userMessage) {
+        if (!userMessage) return;
+
+        // Append User Bubble
+        appendMessage(userMessage, 'user');
+        scrollToBottom();
+
+        // Show Typing Indicator
+        if (aiTypingWrapper) aiTypingWrapper.classList.add('active');
+        scrollToBottom();
+
+        // Add to history
+        chatHistory.push({ role: 'user', content: userMessage });
+
+        // Get AI Answer (from ChatGPT or Smart Fallback)
+        const botResponse = await fetchAIResponse(userMessage);
+
+        // Hide Typing Indicator
+        if (aiTypingWrapper) aiTypingWrapper.classList.remove('active');
+
+        // Append Bot Bubble
+        appendMessage(botResponse, 'bot');
+        scrollToBottom();
+    }
+
+    // Append Message to UI
+    function appendMessage(content, sender) {
+        if (!aiChatBody) return;
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `ai-msg ai-msg-${sender}`;
+        
+        const parsedContent = sender === 'bot' ? formatMarkdown(content) : escapeHtml(content);
+
+        if (sender === 'bot') {
+            msgDiv.innerHTML = `
+                <div class="ai-msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="ai-msg-content">${parsedContent}</div>
+            `;
+        } else {
+            msgDiv.innerHTML = `
+                <div class="ai-msg-content">${parsedContent}</div>
+            `;
+        }
+
+        aiChatBody.appendChild(msgDiv);
+    }
+
+    // Scroll Chat to Bottom
+    function scrollToBottom() {
+        if (aiChatBody) {
+            aiChatBody.scrollTop = aiChatBody.scrollHeight;
+        }
+    }
+
+    // Fetch AI Response (ChatGPT API with fallback)
+    async function fetchAIResponse(query) {
+        const apiKey = localStorage.getItem('manoj_openai_api_key');
+
+        if (apiKey && apiKey.trim().startsWith('sk-')) {
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey.trim()}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4o-mini',
+                        messages: [
+                            { role: 'system', content: MANOJ_SYSTEM_PROMPT },
+                            ...chatHistory.slice(-8)
+                        ],
+                        max_tokens: 400,
+                        temperature: 0.7
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.choices && data.choices[0] && data.choices[0].message) {
+                        const reply = data.choices[0].message.content;
+                        chatHistory.push({ role: 'assistant', content: reply });
+                        return reply;
+                    }
+                } else {
+                    console.warn("OpenAI API returned error, switching to Smart AI Engine fallback.");
+                }
+            } catch (err) {
+                console.warn("OpenAI fetch failed, switching to Smart AI Engine fallback.", err);
+            }
+        }
+
+        // Smart Knowledge Engine Fallback (Instant offline response if API key not present or call fails)
+        return getSmartFallbackReply(query);
+    }
+
+    // Smart Knowledge Engine Fallback Response Generator
+    function getSmartFallbackReply(query) {
+        const q = query.toLowerCase();
+
+        if (q.includes('who is') || q.includes('about manoj') || q.includes('introduction') || q.includes('bio') || q.includes('tell me about')) {
+            return `**Pinnika Manoj** is a results-driven **Python & Django Full-Stack Web Applications Developer** based in **Hyderabad, India**.\n\nHe specializes in building and deploying production-grade web applications, designing RESTful APIs, database modeling, and optimizing backend performance.`;
+        }
+
+        if (q.includes('skill') || q.includes('tech') || q.includes('stack') || q.includes('python') || q.includes('django') || q.includes('language')) {
+            return `Here are **Pinnika Manoj's Key Technical Skills**:\n\n• **Python**: 95% (Core, Async, Backend Data Structures)\n• **Django**: 90% (Architecture, Admin, Middleware)\n• **Django ORM & SQL**: 88% (Database Modeling & Query Optimization)\n• **REST APIs**: 88% (Endpoints, Auth, Integrations)\n• **JavaScript**: 80% (DOM Manipulation, Async JS, ES6+)\n• **HTML5 & CSS3**: 90% (Responsive Glassmorphism & UI Design)\n• **Tools**: Git & GitHub, VS Code, Linux/Windows.`;
+        }
+
+        if (q.includes('project') || q.includes('work') || q.includes('portfolio') || q.includes('smarttopia') || q.includes('dsr')) {
+            return `Here are Manoj's featured **Production Projects**:\n\n1. 🚀 **Smarttopia Edutech Platform** ([smarttopiaedutech.com](https://smarttopiaedutech.com))\nFull-stack educational platform built with Python, Django & REST APIs featuring course delivery and admin dashboards.\n\n2. 💼 **DSR Cloud Tech Website** ([dsrcloudtech.com](https://dsrcloudtech.com))\nCorporate web application with dynamic CMS and SEO optimization.\n\n3. 🛒 **E-Commerce Web Application**\nMulti-category e-commerce portal with checkout routines, payment integration, and responsive design.`;
+        }
+
+        if (q.includes('experience') || q.includes('company') || q.includes('job') || q.includes('role') || q.includes('kiga') || q.includes('smarttopia')) {
+            return `Here is Manoj's **Professional Experience**:\n\n1. **Python Developer** | *Smarttopia Edutech Pvt. Ltd.* (Apr 2026 – Present)\n• Deployed 3 live production websites using Python, Django, and REST APIs.\n• Designed scalable database models and RESTful API endpoints.\n• Reduced page load times via query optimization & caching.\n\n2. **Python Developer Intern** | *KIGA IT Solutions* (Jan 2026 – Apr 2026)\n• Maintained corporate web services, REST APIs, and database migrations in an Agile team.`;
+        }
+
+        if (q.includes('education') || q.includes('degree') || q.includes('mca') || q.includes('bsc') || q.includes('college') || q.includes('university')) {
+            return `Here is Manoj's **Academic Profile**:\n\n🎓 **Master of Computer Applications (MCA)**\nAndhra Loyola College, Vijayawada (2022 – 2024)\n• **CGPA**: **8.1 / 10**\n\n🎓 **Bachelor of Computer Science (B.Sc.)**\nSri Nagarjuna Degree College, Ongole (2019 – 2022)\n• **CGPA**: **8.0 / 10**`;
+        }
+
+        if (q.includes('contact') || q.includes('email') || q.includes('phone') || q.includes('reach') || q.includes('hire') || q.includes('number') || q.includes('whatsapp')) {
+            return `You can connect with **Pinnika Manoj** directly:\n\n• 📧 **Email**: [manojpinnika2002@gmail.com](mailto:manojpinnika2002@gmail.com)\n• 📞 **Phone / WhatsApp**: [+91 70325 54637](https://wa.me/917032554637)\n• 📍 **Location**: Hyderabad, Telangana, India\n• 🐙 **GitHub**: [github.com/manojpinnika](https://github.com/manojpinnika)\n• 💼 **LinkedIn**: [linkedin.com/in/pinnika-manoj](https://linkedin.com/in/pinnika-manoj-7a28b8257)`;
+        }
+
+        return `Thank you for asking! **Pinnika Manoj** is an experienced **Python & Django Developer** with expertise in building scalable web applications and REST APIs.\n\nFeel free to ask me about his **skills**, **live projects**, **experience**, **education**, or **how to hire/contact him**!`;
+    }
+
+    // Helper: Markdown Formatter to HTML
+    function formatMarkdown(text) {
+        if (!text) return '';
+        let str = text;
+        // Escape basic HTML except generated tags
+        str = escapeHtml(str);
+        // Bold **text**
+        str = str.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Italic *text*
+        str = str.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        // Links [text](url)
+        str = str.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        // Line breaks & bullet points
+        const lines = str.split('\n');
+        let htmlResult = '';
+        let inList = false;
+
+        lines.forEach(line => {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('• ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                if (!inList) {
+                    htmlResult += '<ul>';
+                    inList = true;
+                }
+                htmlResult += `<li>${trimmed.substring(2)}</li>`;
+            } else {
+                if (inList) {
+                    htmlResult += '</ul>';
+                    inList = false;
+                }
+                if (trimmed.length > 0) {
+                    htmlResult += `<p>${trimmed}</p>`;
+                }
+            }
+        });
+
+        if (inList) htmlResult += '</ul>';
+        return htmlResult;
+    }
+
+    // Helper: Escape Raw HTML
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 });
+
